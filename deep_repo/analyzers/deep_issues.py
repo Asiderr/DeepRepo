@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-# from collections import defaultdict
 import hdbscan
 
 from datetime import datetime
 from deep_repo.deep_base import DeepRepoBase
 from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_distances
+from sklearn.metrics.pairwise import manhattan_distances
 
 
 class DeepIssues(DeepRepoBase):
@@ -49,40 +48,47 @@ class DeepIssues(DeepRepoBase):
         Analyze the collected issue data.
         """
         self.log.info("Analyzing issue data.")
-        # Implementation for analyzing issue data goes here
         if not self.issues:
             raise ValueError("Open issues not found.")
 
-        model = SentenceTransformer("all-MiniLM-L6-v2")
+        model = SentenceTransformer("all-MiniLM-L12-v2")
         vectors = model.encode(list(self.issues.keys()),
                                normalize_embeddings=True)
-        distance_matrix = cosine_distances(vectors).astype("double")
+        distance_matrix = manhattan_distances(vectors).astype("double")
         clustering = hdbscan.HDBSCAN(
             min_cluster_size=2,
             min_samples=1,
-            metric="precomputed"
+            metric="precomputed",
         ).fit_predict(distance_matrix)
 
         for label, issue in zip(clustering, list(self.issues.items())):
             title, url = issue
             self.analysis.setdefault(label, []).append(f"{title}: {url}")
 
+        self.analysis = dict(sorted(self.analysis.items(),
+                                    key=lambda item: len(item[1]),
+                                    reverse=True))
+        self.analysis[-1] = self.analysis.pop(-1)
+
     def generate_report(self):
         """
         Generate a report based on the analyzed issue data.
         """
         self.log.info("Generating report for issues.")
-        # Implementation for generating report goes here
         if not self.analysis:
             raise ValueError("Analysis not found")
 
         now_str = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        file_name = f"issue_analysis_{now_str}.log"
+        file_name = (f"issue_analysis_{self.repo_url.replace('/', '_')}"
+                     f"_{now_str}.md")
 
         with open(file_name, "w") as file:
+            file.write(f"# Issues Analysis Report for {self.repo_url}\n\n")
             for i, items in enumerate(self.analysis.items()):
                 label, issues = items
-                file.write(f"### Group {i if label != -1 else 'Other'}:\n\n")
+                file.write(f"### Group {i+1 if label != -1 else 'Other'}:\n\n")
                 for issue in issues:
                     file.write(f"* {issue}\n")
-                file.write("---------------------------------\n\n")
+                file.write("\n---------------------------------\n\n")
+
+        self.log.info(f"Report generated: {file_name}")
