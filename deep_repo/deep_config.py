@@ -44,6 +44,18 @@ class DeepRepoConfig:
         )
         mode_group = parser.add_mutually_exclusive_group(required=True)
         mode_group.add_argument(
+            "-q",
+            "--issue_quality",
+            action="store_true",
+            help="Analyse issue quality"
+        )
+        mode_group.add_argument(
+            "-b",
+            "--boomerangs",
+            action="store_true",
+            help="Analyse boomerangs in test failures"
+        )
+        mode_group.add_argument(
             "-i",
             "--issues",
             action="store_true",
