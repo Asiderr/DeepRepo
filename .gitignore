@@ -2,3 +2,5 @@ venv
 *.pyc
 .env
 *.log
+*.md
+!README.md
