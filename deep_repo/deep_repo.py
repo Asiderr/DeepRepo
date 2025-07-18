@@ -3,10 +3,14 @@
 import sys
 
 from deep_repo.analyzers.deep_issues import DeepIssues
+from deep_repo.analyzers.deep_boomerangs import DeepBoomerangs
+from deep_repo.analyzers.deep_issue_quality import DeepIssuesQuality
 from deep_repo.deep_config import DeepRepoConfig
 
 ANALYZERS = {
     "issues": DeepIssues,
+    "boomerangs": DeepBoomerangs,
+    "issue_quality": DeepIssuesQuality,
 }
 
 
@@ -17,6 +21,8 @@ class DeepRepo(DeepRepoConfig):
         self.repo_path = cmdline_input.repo_path
         self.all_modes = cmdline_input.all
         self.issue_mode = cmdline_input.issues
+        self.boomerangs_mode = cmdline_input.boomerangs
+        self.issue_quality_mode = cmdline_input.issue_quality
         self.setup_logger()
         try:
             self.load_env_vars(envpath=envpath)
@@ -44,6 +50,18 @@ class DeepRepo(DeepRepoConfig):
             self.log.info("Creating issues analysis"
                           f" for issues {self.repo_path}.")
             analyzer = self.deep_repo_factory("issues")
+            analyzer.run()
+            sys.exit(0)
+        elif self.boomerangs_mode:
+            self.log.info("Creating boomerangs analysis"
+                          f" for issues {self.repo_path}.")
+            analyzer = self.deep_repo_factory("boomerangs")
+            analyzer.run()
+            sys.exit(0)
+        elif self.issue_quality_mode:
+            self.log.info("Creating issue quality analysis"
+                          f" for issues {self.repo_path}.")
+            analyzer = self.deep_repo_factory("issue_quality")
             analyzer.run()
             sys.exit(0)
         else:
