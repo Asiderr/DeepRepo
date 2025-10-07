@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
 
+import os
 import sys
 
 from deep_repo.analyzers.deep_issues import DeepIssues
 from deep_repo.analyzers.deep_boomerangs import DeepBoomerangs
 from deep_repo.analyzers.deep_issue_quality import DeepIssuesQuality
+from deep_repo.analyzers.deep_resource_analysis import DeepResourceAnalysis
+from deep_repo.analyzers.deep_code_quality import DeepCodeQuality
 from deep_repo.deep_config import DeepRepoConfig
 
 ANALYZERS = {
     "issues": DeepIssues,
     "boomerangs": DeepBoomerangs,
     "issue_quality": DeepIssuesQuality,
+    "resource_analysis": DeepResourceAnalysis,
+    "code_quality": DeepCodeQuality,
 }
 
 
@@ -23,6 +28,8 @@ class DeepRepo(DeepRepoConfig):
         self.issue_mode = cmdline_input.issues
         self.boomerangs_mode = cmdline_input.boomerangs
         self.issue_quality_mode = cmdline_input.issue_quality
+        self.resource_analysis_mode = cmdline_input.mmv1_resources
+        self.code_quality_mode = cmdline_input.code_quality
         self.setup_logger()
         try:
             self.load_env_vars(envpath=envpath)
@@ -62,6 +69,20 @@ class DeepRepo(DeepRepoConfig):
             self.log.info("Creating issue quality analysis"
                           f" for issues {self.repo_path}.")
             analyzer = self.deep_repo_factory("issue_quality")
+            analyzer.run()
+            sys.exit(0)
+        elif self.resource_analysis_mode:
+            repo_path = os.getenv("repo_path")
+            self.log.info("Creating analysis of the compute resource types"
+                          f"for {repo_path}.")
+            analyzer = self.deep_repo_factory("resource_analysis")
+            analyzer.run()
+            sys.exit(0)
+        elif self.code_quality_mode:
+            repo_path = os.getenv("repo_path")
+            self.log.info("Creating code quality analysis"
+                          f" for {repo_path}.")
+            analyzer = self.deep_repo_factory("code_quality")
             analyzer.run()
             sys.exit(0)
         else:

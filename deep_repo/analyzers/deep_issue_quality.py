@@ -178,8 +178,8 @@ class DeepIssuesQuality(DeepRepoBase):
                        f"{self.average_open_time}\n\n")
             file.write("### Issues with the longest resolution time\n\n")
             for i, issue in enumerate(self.longest_resolution_issues):
-                file.write(f"{i+1}. {issue["title"]} - "
-                           f"{issue["resolution_time"]}: {issue["url"]}\n")
+                file.write(f"{i+1}. {issue['title']} - "
+                           f"{issue['resolution_time']}: {issue['url']}\n")
             file.write("\n---------------------------------\n\n")
 
             file.write("## Time to first comment\n\n")
@@ -187,8 +187,8 @@ class DeepIssuesQuality(DeepRepoBase):
                        f"{self.average_reaction_time}\n\n")
             file.write("### Issues with the longest time to first comment\n\n")
             for i, issue in enumerate(self.longest_reaction_issues):
-                file.write(f"{i+1}. {issue["title"]} - "
-                           f"{issue["first_reaction_time"]}: {issue["url"]}\n")
+                file.write(f"{i+1}. {issue['title']} - "
+                           f"{issue['first_reaction_time']}: {issue['url']}\n")
             file.write("\n---------------------------------\n\n")
 
             file.write("## The most commented issues\n\n")
@@ -196,8 +196,8 @@ class DeepIssuesQuality(DeepRepoBase):
                        f"{self.average_comment_number}\n\n")
             file.write("### List of the most commented issues\n\n")
             for i, issue in enumerate(self.most_commented_issues):
-                file.write(f"{i+1}. {issue["title"]} - "
-                           f"{issue["comments_number"]}: {issue["url"]}\n")
+                file.write(f"{i+1}. {issue['title']} - "
+                           f"{issue['comments_number']}: {issue['url']}\n")
             file.write("\n---------------------------------\n\n")
 
             file.write("## The most engaging issues\n\n")
@@ -205,7 +205,7 @@ class DeepIssuesQuality(DeepRepoBase):
                        f"{self.average_reaction_count}\n\n")
             file.write("### List of the most engaging issues\n\n")
             for i, issue in enumerate(self.most_engaging_issues):
-                file.write(f"{i+1}. {issue["title"]} - "
-                           f"{issue["reactions"]}: {issue["url"]}\n")
+                file.write(f"{i+1}. {issue['title']} - "
+                           f"{issue['reactions']}: {issue['url']}\n")
             file.write("\n---------------------------------\n\n")
         self.log.info(f"Report generated: {file_name}")

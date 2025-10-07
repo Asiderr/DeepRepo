@@ -62,6 +62,18 @@ class DeepRepoConfig:
             help="Analyse GitHub issues"
         )
         mode_group.add_argument(
+            "-m",
+            "--mmv1_resources",
+            action="store_true",
+            help="Analyse compute resources type"
+        )
+        mode_group.add_argument(
+            "-c",
+            "--code_quality",
+            action="store_true",
+            help="Analyse code quality"
+        )
+        mode_group.add_argument(
             "-a",
             "--all",
             action="store_true",
