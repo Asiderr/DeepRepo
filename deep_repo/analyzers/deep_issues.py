@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import hdbscan
 
 from datetime import datetime
@@ -36,7 +37,13 @@ class DeepIssues(DeepRepoBase):
         repo = self.git_api.get_repo(self.repo_url)
         if not repo:
             raise ValueError(f"Repository '{self.repo_url}' not found.")
-        open_issues = repo.get_issues(state='open')
+        self._label = os.getenv("ISSUE_LABEL")
+        if self._label:
+            self.log.info(f"Filtering issues with label: {self._label}")
+            open_issues = repo.get_issues(state='open', labels=[self._label])
+        else:
+            self.log.info("No issue label filter applied.")
+            open_issues = repo.get_issues(state='open')
         for issue in open_issues:
             self.issues.update({issue.title: issue.html_url})
 
@@ -66,8 +73,7 @@ class DeepIssues(DeepRepoBase):
             self.analysis.setdefault(label, []).append(f"{title}: {url}")
 
         self.analysis = dict(sorted(self.analysis.items(),
-                                    key=lambda item: len(item[1]),
-                                    reverse=True))
+                                    key=lambda item: len(item[1])))
         self.analysis[-1] = self.analysis.pop(-1)
 
     def generate_report(self):
@@ -83,7 +89,11 @@ class DeepIssues(DeepRepoBase):
                      f"_{now_str}.md")
 
         with open(file_name, "w") as file:
-            file.write(f"# Issues Analysis Report for {self.repo_url}\n\n")
+            if self._label:
+                file.write(f"# Issues Analysis Report for '{self._label}' "
+                           f"label in {self.repo_url}\n\n")
+            else:
+                file.write(f"# Issues Analysis Report for {self.repo_url}\n\n")
             for i, items in enumerate(self.analysis.items()):
                 label, issues = items
                 file.write(f"### Group {i+1 if label != -1 else 'Other'}:\n\n")

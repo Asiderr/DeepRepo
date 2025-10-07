@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import hdbscan
+import os
 
 from datetime import datetime
 from deep_repo.deep_base import DeepRepoBase
@@ -36,7 +37,13 @@ class DeepBoomerangs(DeepRepoBase):
         repo = self.git_api.get_repo(self.repo_url)
         if not repo:
             raise ValueError(f"Repository '{self.repo_url}' not found.")
-        open_issues = repo.get_issues(state='open')
+        self._label = os.getenv("ISSUE_LABEL")
+        if self._label:
+            self.log.info(f"Filtering issues with label: {self._label}")
+            open_issues = repo.get_issues(state='open', labels=[self._label])
+        else:
+            self.log.info("No issue label filter applied.")
+            open_issues = repo.get_issues(state='open')
         for issue in open_issues:
             self.issues.update({issue.title: issue.html_url})
 
@@ -84,8 +91,12 @@ class DeepBoomerangs(DeepRepoBase):
                      f"_{now_str}.md")
 
         with open(file_name, "w") as file:
-            file.write("# Boomerang Test Failures Report for "
-                       f"{self.repo_url}\n\n")
+            if self._label:
+                file.write("# Boomerang Test Failures Report for issues with "
+                           f"label '{self._label}' in {self.repo_url}\n\n")
+            else:
+                file.write("# Boomerang Test Failures Report for "
+                           f"{self.repo_url}\n\n")
             group_number = 1
             for label, issues in self.analysis.items():
                 group_empty = True
