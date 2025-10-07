@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import os
+
 from datetime import datetime, timedelta
 from deep_repo.deep_base import DeepRepoBase
 
@@ -31,8 +33,16 @@ class DeepIssuesQuality(DeepRepoBase):
         repo = self.git_api.get_repo(self.repo_url)
         if not repo:
             raise ValueError(f"Repository '{self.repo_url}' not found.")
-        since = datetime.now() - timedelta(days=30)
-        closed_issues = repo.get_issues(state='closed', since=since)
+        self._label = os.getenv("ISSUE_LABEL")
+        if self._label:
+            self.log.info(f"Filtering issues with label: {self._label}")
+            closed_issues = repo.get_issues(state='closed',
+                                            labels=[self._label])
+        else:
+            self.log.info("No issue label filter applied, fetching issues"
+                          " closed in the last 30 days.")
+            since = datetime.now() - timedelta(days=30)
+            closed_issues = repo.get_issues(state='closed', since=since)
         for issue in closed_issues:
             if ("Failing test(s)" in issue.title or issue.comments == 0
                     or "/pull/" in issue.html_url):
@@ -171,8 +181,12 @@ class DeepIssuesQuality(DeepRepoBase):
         file_name = ("issue_quality_analysis_"
                      f"{self.repo_url.replace('/', '_')}_{now_str}.md")
         with open(file_name, "w") as file:
-            file.write("# Issues Quality Analysis Report for "
-                       f"{self.repo_url}\n\n")
+            if self._label:
+                file.write("# Issues Quality Analysis Report for issues with "
+                           f"label '{self._label}' in {self.repo_url}\n\n")
+            else:
+                file.write("# Issues Quality Analysis Report for "
+                           f"{self.repo_url}\n\n")
             file.write("## Issues resolution time\n\n")
             file.write("Average time of issue resolution: "
                        f"{self.average_open_time}\n\n")
