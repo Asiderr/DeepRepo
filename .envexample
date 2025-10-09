@@ -1,0 +1,3 @@
+GITHUB_TOKEN=github_pat_TOKEN
+REPO_PATH=PATH/TO/hashicorp/terraform-provider-google-beta/google-beta/services/compute
+ISSUE_LABEL=issue/label

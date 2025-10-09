@@ -17,6 +17,9 @@ MMV1_PATTERN = re.compile(
 
 
 class DeepResourceAnalysis(DeepRepoBase):
+    """
+    Class for analyzing resource types in a repository (handwritten vs MMv1).
+    """
     def __init__(self, repo_url_or_path, log, api_github):
         """
         Initialize the DeepResourceAnalysis analyzer with a repository
@@ -71,10 +74,10 @@ class DeepResourceAnalysis(DeepRepoBase):
             resource_path = os.path.join(self.repo_path, resource)
             with open(resource_path, 'r', encoding='utf-8') as file:
                 content = file.read()
-                if re.search(HANDWRITTEN_PATTERN, content):
-                    self.handwritten_resources.append(resource)
-                elif re.search(MMV1_PATTERN, content):
+                if re.search(MMV1_PATTERN, content):
                     self.mmv1_resources.append(resource)
+                else:
+                    self.handwritten_resources.append(resource)
 
         self.number_of_resources = len(self.resources)
         self.number_of_handwritten = len(self.handwritten_resources)

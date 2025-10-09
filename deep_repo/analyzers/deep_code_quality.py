@@ -11,6 +11,9 @@ TODO_PATTERN = re.compile(r'.*TODO.*', re.IGNORECASE)
 
 
 class DeepCodeQuality(DeepRepoBase):
+    """
+    Class for analyzing code quality in a repository.
+    """
     def __init__(self, repo_url_or_path, log, api_github):
         """
         Initialize the DeepCodeQuality analyzer with a repository
@@ -35,7 +38,7 @@ class DeepCodeQuality(DeepRepoBase):
         if not self._repo_path:
             raise EnvironmentError("self._repo_path environment"
                                    " variable is not set.")
-        elif self.repo_url not in self._repo_path:
+        elif f"{self.repo_url}/" not in self._repo_path:
             raise ValueError(
                 f"Repository path '{self._repo_path}' does not match "
                 f"the repository URL '{self.repo_url}'."

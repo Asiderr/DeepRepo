@@ -34,7 +34,9 @@ class DeepRepoConfig:
         Method parses commandline input and shows help message if needed.
         """
         description = (
-            "Tool analysis most common issues in the GitHub repositories"
+            "Tool analysis most common issues in the terraform-provider"
+            "-repositories (hashicorp/terraform-provider-google and"
+            " hashicorp/terraform-provider-google-beta)"
         )
         parser = argparse.ArgumentParser(description=description)
         parser.add_argument(
@@ -71,7 +73,7 @@ class DeepRepoConfig:
             "-c",
             "--code_quality",
             action="store_true",
-            help="Analyse code quality"
+            help="Analyse code quality - technical dept"
         )
         mode_group.add_argument(
             "-a",

@@ -90,6 +90,6 @@ class DeepRepo(DeepRepoConfig):
             sys.exit(1)
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":
     cls_deep_repo = DeepRepo()
     cls_deep_repo.deep_repo_main()
