@@ -44,4 +44,5 @@ Create `.env` file based on [.envexample](.envexample).
 Repository must be placed in a folder named hashicorp eg.
 `/PATH/TO/hashicorp/terraform-provider-google-beta/google-beta/services/compute`
 * **ISSUE_LABEL** (optional) - Filter for repository issues
-
+* **GEMINI_API_KEY** (required) - Gemini API key -
+[documentation](https://ai.google.dev/gemini-api/docs/api-key)
