@@ -4,11 +4,12 @@ import hdbscan
 
 from datetime import datetime
 from deep_repo.deep_base import DeepRepoBase
+from deep_repo.deep_genai import DeepGenai
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import manhattan_distances
 
 
-class DeepIssues(DeepRepoBase):
+class DeepIssues(DeepRepoBase, DeepGenai):
     """
     Class for analyzing issues in a repository.
     """
@@ -38,14 +39,20 @@ class DeepIssues(DeepRepoBase):
         if not repo:
             raise ValueError(f"Repository '{self.repo_url}' not found.")
         self._label = os.getenv("ISSUE_LABEL")
+        open_issues = []
         if self._label:
             self.log.info(f"Filtering issues with label: {self._label}")
-            open_issues = repo.get_issues(state='open', labels=[self._label])
+            self._label = self._label.split(",")
+            for label in self._label:
+                self.log.debug(f"Fetching issues with label: {label}")
+                open_issues.append(repo.get_issues(state='open',
+                                                   labels=[label]))
         else:
             self.log.info("No issue label filter applied.")
-            open_issues = repo.get_issues(state='open')
-        for issue in open_issues:
-            self.issues.update({issue.title: issue.html_url})
+            open_issues.append(repo.get_issues(state='open'))
+        for issue_list in open_issues:
+            for issue in issue_list:
+                self.issues.update({issue.title: issue.html_url})
 
         if not self.issues:
             raise ValueError("Issues not available")
@@ -54,6 +61,8 @@ class DeepIssues(DeepRepoBase):
         """
         Analyze the collected issue data.
         """
+        self.group_titles = {}
+
         self.log.info("Analyzing issue data.")
         if not self.issues:
             raise ValueError("Open issues not found.")
@@ -71,6 +80,19 @@ class DeepIssues(DeepRepoBase):
         for label, issue in zip(clustering, list(self.issues.items())):
             title, url = issue
             self.analysis.setdefault(label, []).append(f"{title}: {url}")
+            # Aggregate titles for each group
+            self.group_titles.setdefault(label, "")
+            if self.group_titles[label]:
+                self.group_titles[label] += f" {title}"
+            else:
+                self.group_titles[label] = title
+
+        self.setup_gemini_api()
+        for label, titles in self.group_titles.items():
+            if label == -1:
+                self.analysis[label].insert(0, "- Miscellaneous Issues")
+            title = self.generate_cluster_title(titles)
+            self.analysis[label].insert(0, title)
 
         self.analysis = dict(sorted(self.analysis.items(),
                                     key=lambda item: len(item[1])))
@@ -90,14 +112,18 @@ class DeepIssues(DeepRepoBase):
 
         with open(file_name, "w") as file:
             if self._label:
-                file.write(f"# Issues Analysis Report for '{self._label}' "
-                           f"label in {self.repo_url}\n\n")
+                bullet = "\n* "
+                file.write(f"# Issues Analysis Report in {self.repo_url}\n\n")
+                file.write("**Filtered by label(s):**\n*"
+                           f"{bullet.join(self._label)}\n\n")
             else:
                 file.write(f"# Issues Analysis Report for {self.repo_url}\n\n")
             for i, items in enumerate(self.analysis.items()):
                 label, issues = items
-                file.write(f"### Group {i+1 if label != -1 else 'Other'}:\n\n")
-                for issue in issues:
+                file.write(
+                    f"### Group {i+1 if label != -1 else 'Other'}"
+                    f"{issues[0] if issues[0] else ''}:\n\n")
+                for issue in issues[1:]:
                     file.write(f"* {issue}\n")
                 file.write("\n---------------------------------\n\n")
 

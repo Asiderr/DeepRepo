@@ -34,29 +34,34 @@ class DeepIssuesQuality(DeepRepoBase):
         if not repo:
             raise ValueError(f"Repository '{self.repo_url}' not found.")
         self._label = os.getenv("ISSUE_LABEL")
+        closed_issues = []
         if self._label:
             self.log.info(f"Filtering issues with label: {self._label}")
-            closed_issues = repo.get_issues(state='closed',
-                                            labels=[self._label])
+            self._label = self._label.split(",")
+            for label in self._label:
+                self.log.debug(f"Fetching issues with label: {label}")
+                closed_issues.append(repo.get_issues(state='closed',
+                                                     labels=[label]))
         else:
             self.log.info("No issue label filter applied, fetching issues"
                           " closed in the last 30 days.")
             since = datetime.now() - timedelta(days=30)
-            closed_issues = repo.get_issues(state='closed', since=since)
-        for issue in closed_issues:
-            if ("Failing test(s)" in issue.title or issue.comments == 0
-                    or "/pull/" in issue.html_url):
-                continue
-            self.issues.append({
-                "title": issue.title,
-                "created_at": issue.created_at,
-                "closed_at": issue.closed_at,
-                "resolution_time": issue.closed_at - issue.created_at,
-                "comments_number": issue.comments,
-                "comments": issue.get_comments(),
-                "reactions": issue.reactions["total_count"],
-                "url": issue.html_url,
-            })
+            closed_issues.append(repo.get_issues(state='closed', since=since))
+        for issue_list in closed_issues:
+            for issue in issue_list:
+                if ("Failing test(s)" in issue.title or issue.comments == 0
+                        or "/pull/" in issue.html_url):
+                    continue
+                self.issues.append({
+                    "title": issue.title,
+                    "created_at": issue.created_at,
+                    "closed_at": issue.closed_at,
+                    "resolution_time": issue.closed_at - issue.created_at,
+                    "comments_number": issue.comments,
+                    "comments": issue.get_comments(),
+                    "reactions": issue.reactions["total_count"],
+                    "url": issue.html_url,
+                })
 
         if not self.issues:
             raise ValueError("Issues not available")
@@ -182,8 +187,11 @@ class DeepIssuesQuality(DeepRepoBase):
                      f"{self.repo_url.replace('/', '_')}_{now_str}.md")
         with open(file_name, "w") as file:
             if self._label:
+                bullet = "\n* "
                 file.write("# Issues Quality Analysis Report for issues with "
-                           f"label '{self._label}' in {self.repo_url}\n\n")
+                           f"in {self.repo_url}\n\n")
+                file.write("**Filtered by label(s):**"
+                           f"{bullet.join(self._label)}\n\n")
             else:
                 file.write("# Issues Quality Analysis Report for "
                            f"{self.repo_url}\n\n")
