@@ -192,15 +192,12 @@ class DeepIssuesQuality(DeepRepoBase):
         file_name = ("issue_quality_analysis_"
                      f"{self.repo_url.replace('/', '_')}_{now_str}.md")
         with open(file_name, "w") as file:
+            file.write("# Issues Quality Analysis Report for "
+                       f"{self.repo_url}\n\n")
             if self._label:
                 bullet = "\n* "
-                file.write("# Issues Quality Analysis Report for issues with "
-                           f"in {self.repo_url}\n\n")
                 file.write("**Filtered by label(s):**"
                            f"{bullet.join(self._label)}\n\n")
-            else:
-                file.write("# Issues Quality Analysis Report for "
-                           f"{self.repo_url}\n\n")
             file.write("## Issues resolution time\n\n")
             file.write("Average time of issue resolution: "
                        f"{self.average_open_time}\n\n")

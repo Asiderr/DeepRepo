@@ -55,7 +55,7 @@ class DeepBoomerangs(DeepRepoBase, DeepGenai):
                                                    labels=[label]))
         else:
             self.log.info("No issue label filter applied.")
-            open_issues = repo.get_issues(state='open')
+            open_issues.append(repo.get_issues(state='open'))
         for issue_list in open_issues:
             for issue in issue_list:
                 self.issues.update({issue.title: issue.html_url})
@@ -121,15 +121,13 @@ class DeepBoomerangs(DeepRepoBase, DeepGenai):
                      f"_{now_str}.md")
 
         with open(file_name, "w") as file:
+            file.write("# Boomerang Test Failures Report for "
+                       f"{self.repo_url}\n\n")
             if self._label:
                 bullet = "\n* "
-                file.write("# Boomerang Test Failures Report for "
-                           f"{self.repo_url}\n\n")
                 file.write("**Filtered by label(s):**\n*"
                            f"{bullet.join(self._label)}\n\n")
-            else:
-                file.write("# Boomerang Test Failures Report for "
-                           f"{self.repo_url}\n\n")
+
             for i, item in enumerate(self.analysis.items()):
                 label, issues = item
                 file.write(
