@@ -117,13 +117,12 @@ class DeepIssues(DeepRepoBase, DeepGenai):
                      f"_{now_str}.md")
 
         with open(file_name, "w") as file:
+            file.write(f"# Issues Analysis Report for {self.repo_url}\n\n")
             if self._label:
                 bullet = "\n* "
-                file.write(f"# Issues Analysis Report in {self.repo_url}\n\n")
                 file.write("**Filtered by label(s):**\n*"
                            f"{bullet.join(self._label)}\n\n")
-            else:
-                file.write(f"# Issues Analysis Report for {self.repo_url}\n\n")
+
             for i, items in enumerate(self.analysis.items()):
                 label, issues = items
                 file.write(

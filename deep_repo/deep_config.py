@@ -78,7 +78,7 @@ class DeepRepoConfig:
             "-c",
             "--code_quality",
             action="store_true",
-            help="Analyse code quality - technical dept"
+            help="Analyse code quality - technical debt"
         )
         mode_group.add_argument(
             "-a",

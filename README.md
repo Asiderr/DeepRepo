@@ -6,10 +6,10 @@ hashicorp/terraform-provider-google-beta).
 
 ## Functionalities
 
-* Technical dept analysis
+* Technical debt analysis
 * Resource generation analysis
 * Open issues analysis
-* Analysis of the issue support issue
+* Analysis of issue support quality
 * Boomerang tests analysis
 
 ## Usage
@@ -26,7 +26,7 @@ options:
   -b, --boomerangs      Analyse boomerangs in test failures
   -i, --issues          Analyse GitHub issues
   -m, --mmv1_resources  Analyse compute resources type
-  -c, --code_quality    Analyse code quality - technical dept
+  -c, --code_quality    Analyse code quality - technical debt
   -a, --all             Create full repo analysis
 ```
 

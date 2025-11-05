@@ -20,7 +20,7 @@ class DeepGenai:
                                "Call setup_logger() first.")
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
-            raise ValueError("No GEMINI_API_KEY found"
+            raise ValueError("No GEMINI_API_KEY found "
                              "in environment variables.")
         try:
             self.gemini_client = genai.Client(api_key=api_key)
